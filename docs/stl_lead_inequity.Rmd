@@ -1,0 +1,51 @@
+---
+title: "Stl Lead Inequity"
+author: "Clarissa Boyajian"
+date: "8/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+```
+
+```{r}
+stl_lead <- read_csv(here::here("data", "stl_blood_lead.csv")) 
+
+stl_lead <- stl_lead %>% clean_names()
+```
+
+```{r}
+stl_lead_prop <- stl_lead %>% dplyr::mutate(prop_white = (white / total_pop) * 100) %>% dplyr::mutate(pct_elevated = str_replace(pct_elevated, 
+                                    pattern = ",", 
+                                    replacement = ".")) %>% 
+  dplyr::mutate(pct_elevated = as.numeric(pct_elevated))
+```
+
+```{r}
+stl_lead_plot <- ggplot(data = stl_lead_prop, aes(x = pct_elevated, y = prop_white)) +
+  geom_point(size = 1, aes(color = prop_white), show.legend = FALSE) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Eleveated Blood Lead Level", y = "Percent of White IDing Population")
+  
+  stl_lead_plot
+  
+  ggsave(here::here("figs", "stl_lead_plot.png"), 
+         plot = stl_lead_plot, 
+         height = 5, 
+         width = 6)
+```
+There is a negative correlation between having elevated blood lead levels and identifying as white on the census
+
+```{r, message = FALSE}
+stl_lead_hist <- ggplot(data = stl_lead_prop, aes(x = pct_elevated)) +
+  geom_histogram(fill = "purple", color = "black") +
+  labs(x = "Elevated Blood Lead Level", y = "Count")
+
+stl_lead_hist
+
+ggsave(here::here("figs", "stl_lead_hist.jpg"))
+```
+
